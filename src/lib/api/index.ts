@@ -254,7 +254,13 @@ export const classesApi = {
   /**
    * Create a new class
    */
-  createClass: async (data: { name: string; description?: string }) => {
+  createClass: async (data: {
+    name: string;
+    description?: string;
+    subject?: string;
+    grade_level?: string;
+  }) => {
+    console.log('Creating class with data:', data);
     return apiService.post<any>(API_CONFIG.ENDPOINTS.CLASSES.BASE, data);
   },
 
@@ -508,6 +514,136 @@ export const questionsApi = {
     }>;
   }) => {
     return apiService.post<any>(API_CONFIG.ENDPOINTS.QUESTIONS.BULK, data);
+  },
+};
+
+/**
+ * Analytics service
+ */
+export const analyticsApi = {
+  /**
+   * Get overview analytics data
+   */
+  getOverview: async (timeRange?: string, classId?: string) => {
+    return apiService.get<any>(API_CONFIG.ENDPOINTS.ANALYTICS.OVERVIEW, {
+      time_range: timeRange,
+      class_id: classId,
+    });
+  },
+
+  /**
+   * Get performance analytics data
+   */
+  getPerformance: async (classId?: string) => {
+    return apiService.get<any>(API_CONFIG.ENDPOINTS.ANALYTICS.PERFORMANCE, {
+      class_id: classId,
+    });
+  },
+};
+
+/**
+ * Dashboard service
+ */
+export const dashboardApi = {
+  /**
+   * Get dashboard statistics
+   */
+  getStats: async () => {
+    return apiService.get<any>(API_CONFIG.ENDPOINTS.DASHBOARD.STATS);
+  },
+
+  /**
+   * Get recent classes and exams
+   */
+  getRecent: async () => {
+    return apiService.get<any>(API_CONFIG.ENDPOINTS.DASHBOARD.RECENT);
+  },
+};
+
+/**
+ * Materials service
+ */
+export const materialsApi = {
+  /**
+   * Get all materials
+   */
+  getMaterials: async (classId?: string) => {
+    return apiService.get<any>(API_CONFIG.ENDPOINTS.MATERIALS.BASE, { class_id: classId });
+  },
+
+  /**
+   * Get a material by ID
+   */
+  getMaterial: async (id: string) => {
+    return apiService.get<any>(API_CONFIG.ENDPOINTS.MATERIALS.DETAIL(id));
+  },
+
+  /**
+   * Upload a material
+   */
+  uploadMaterial: async (file: File, title: string, description: string, classId: string) => {
+    const path = `${SUPABASE_CONFIG.STORAGE.BUCKETS.MATERIALS}/${Date.now()}_${file.name}`;
+    const url = await apiService.uploadFile(SUPABASE_CONFIG.STORAGE.BUCKETS.MATERIALS, path, file);
+
+    return apiService.post<any>(API_CONFIG.ENDPOINTS.MATERIALS.BASE, {
+      title,
+      description,
+      class_id: classId,
+      file_url: url,
+      file_type: file.type,
+      file_size: file.size,
+    });
+  },
+
+  /**
+   * Process a material for AI question generation
+   */
+  processMaterial: async (materialId: string) => {
+    return apiService.post<any>(API_CONFIG.ENDPOINTS.MATERIALS.PROCESS, {
+      material_id: materialId,
+    });
+  },
+
+  /**
+   * Delete a material
+   */
+  deleteMaterial: async (id: string) => {
+    return apiService.delete<any>(API_CONFIG.ENDPOINTS.MATERIALS.DETAIL(id));
+  },
+};
+
+/**
+ * Submissions service
+ */
+export const submissionsApi = {
+  /**
+   * Get all submissions for an exam
+   */
+  getSubmissions: async (examId: string) => {
+    return apiService.get<any>(API_CONFIG.ENDPOINTS.SUBMISSIONS.BASE, { exam_id: examId });
+  },
+
+  /**
+   * Get a submission by ID
+   */
+  getSubmission: async (id: string) => {
+    return apiService.get<any>(API_CONFIG.ENDPOINTS.SUBMISSIONS.DETAIL(id));
+  },
+
+  /**
+   * Submit an exam (for students)
+   */
+  submitExam: async (data: {
+    exam_id: string;
+    access_code: string;
+    student_name: string;
+    matric_number: string;
+    answers: Array<{
+      question_id: string;
+      answer: string | number;
+    }>;
+  }) => {
+    return apiService.post<any>(API_CONFIG.ENDPOINTS.SUBMISSIONS.SUBMIT, data);
   },
 };
 

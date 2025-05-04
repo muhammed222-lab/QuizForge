@@ -4,10 +4,11 @@ import App from './App';
 import { ThemeProvider } from '@/components/theme/theme-provider';
 import './index.css';
 
-// Initialize theme before rendering
+// Always use dark theme
 const initializeTheme = () => {
-  const savedTheme = localStorage.getItem('quizforge_theme') as 'light' | 'dark' | 'system' | null;
-  return savedTheme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  // Set dark theme in localStorage
+  localStorage.setItem('quizforge_theme', 'dark');
+  return 'dark';
 };
 
 ReactDOM.createRoot(document.getElementById('root')!).render(

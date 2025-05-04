@@ -64,8 +64,8 @@ export const Header: React.FC<HeaderProps> = ({
       className={cn(
         'sticky top-0 z-50 transition-all duration-300',
         isScrolled
-          ? 'bg-white shadow-md'
-          : 'bg-white'
+          ? 'bg-gray-800 shadow-md'
+          : 'bg-gray-800'
       )}
       initial={{ y: -100 }}
       animate={{ y: 0 }}
@@ -100,8 +100,8 @@ export const Header: React.FC<HeaderProps> = ({
                   className={cn(
                     'relative px-3 py-2 text-sm font-medium transition-colors',
                     location.pathname === item.href
-                      ? 'text-green-700'
-                      : 'text-black hover:text-green-600'
+                      ? 'text-primary-500'
+                      : 'text-gray-100 hover:text-primary-400'
                   )}
                 >
                   {item.label}
@@ -139,7 +139,7 @@ export const Header: React.FC<HeaderProps> = ({
                   )}
                 </div>
 
-                <span className="hidden md:block text-sm font-medium text-black">
+                <span className="hidden md:block text-sm font-medium text-gray-100">
                   {userName || 'User'}
                 </span>
 
@@ -164,23 +164,23 @@ export const Header: React.FC<HeaderProps> = ({
 
               {/* Profile dropdown menu */}
               {isProfileOpen && (
-                <div className="absolute right-0 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                <div className="absolute right-0 mt-2 w-48 origin-top-right rounded-md bg-gray-800 py-1 shadow-lg ring-1 ring-gray-700 focus:outline-none">
                   <Link
                     to="/app/settings"
-                    className="block px-4 py-2 text-sm text-black hover:bg-gray-100"
+                    className="block px-4 py-2 text-sm text-gray-100 hover:bg-gray-700"
                     onClick={() => setIsProfileOpen(false)}
                   >
                     Your Profile
                   </Link>
                   <Link
                     to="/app/settings"
-                    className="block px-4 py-2 text-sm text-black hover:bg-gray-100"
+                    className="block px-4 py-2 text-sm text-gray-100 hover:bg-gray-700"
                     onClick={() => setIsProfileOpen(false)}
                   >
                     Settings
                   </Link>
                   <button
-                    className="block w-full px-4 py-2 text-left text-sm text-black hover:bg-gray-100"
+                    className="block w-full px-4 py-2 text-left text-sm text-gray-100 hover:bg-gray-700"
                     onClick={() => {
                       setIsProfileOpen(false);
                       onLogout && onLogout();
@@ -199,7 +199,7 @@ export const Header: React.FC<HeaderProps> = ({
             <div className="flex md:hidden">
               <button
                 type="button"
-                className="inline-flex items-center justify-center rounded-md p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-green-500"
+                className="inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-700 hover:text-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500"
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               >
                 <span className="sr-only">Open main menu</span>
@@ -259,8 +259,8 @@ export const Header: React.FC<HeaderProps> = ({
                 className={cn(
                   'block rounded-md px-3 py-2 text-base font-medium',
                   location.pathname === item.href
-                    ? 'bg-green-100 text-green-700'
-                    : 'text-black hover:bg-gray-50 hover:text-green-600'
+                    ? 'bg-primary-500/10 text-primary-500'
+                    : 'text-gray-100 hover:bg-gray-700 hover:text-primary-400'
                 )}
               >
                 {item.label}

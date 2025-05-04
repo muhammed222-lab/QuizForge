@@ -28,9 +28,8 @@ export function ThemeProvider({
   storageKey = 'quizforge_theme',
   ...props
 }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>(
-    () => (localStorage.getItem(storageKey) as Theme) || defaultTheme
-  );
+  // Always use dark theme
+  const [theme, setTheme] = useState<Theme>('dark');
 
   const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>(
     document.documentElement.classList.contains('dark') ? 'dark' : 'light'

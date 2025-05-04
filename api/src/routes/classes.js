@@ -4,6 +4,13 @@ const { validate } = require('../middleware/validation');
 const { ApiError } = require('../middleware/errorHandler');
 const { requireTeacher } = require('../middleware/auth');
 const supabase = require('../utils/db');
+const { createClient } = require('@supabase/supabase-js');
+
+// Initialize Supabase client with service role key for admin operations
+const supabaseAdmin = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
 
 const router = express.Router();
 
@@ -16,6 +23,41 @@ router.get('/', async (req, res, next) => {
   try {
     const userId = req.user.id;
 
+    // Get the teacher_id for the authenticated user
+    let { data: teacherData, error: teacherError } = await supabaseAdmin
+      .from('teachers')
+      .select('id')
+      .eq('auth_user_id', userId)
+      .single();
+
+    // If teacher not found, create one
+    if (teacherError && teacherError.code === 'PGRST116') {
+      console.log('Creating teacher record for user:', userId);
+
+      const { data: newTeacher, error: insertError } = await supabaseAdmin
+        .from('teachers')
+        .insert({
+          auth_user_id: userId,
+          name: req.user.user_metadata?.full_name || req.user.email,
+          email: req.user.email
+        })
+        .select()
+        .single();
+
+      if (insertError) {
+        console.error('Error creating teacher record:', insertError);
+        throw new ApiError(500, 'Failed to create teacher profile');
+      }
+
+      teacherData = newTeacher;
+      console.log('Teacher record created successfully:', teacherData.id);
+    } else if (teacherError) {
+      console.error('Error fetching teacher record:', teacherError);
+      throw new ApiError(404, 'Teacher profile not found');
+    }
+
+    const teacherId = teacherData.id;
+
     // Get classes where the user is the teacher
     const { data, error } = await supabase
       .from('classes')
@@ -23,11 +65,19 @@ router.get('/', async (req, res, next) => {
         id,
         name,
         description,
+        subject,
+        grade_level,
         created_at,
         updated_at,
-        teacher_id
+        teacher_id,
+        (
+          SELECT COUNT(*)
+          FROM class_students
+          WHERE class_students.class_id = classes.id
+        ) as student_count
       `)
-      .eq('teacher_id', userId);
+      .eq('teacher_id', teacherId)
+      .order('created_at', { ascending: false });
 
     if (error) {
       throw new ApiError(500, error.message);
@@ -56,12 +106,49 @@ router.post(
   [
     body('name').notEmpty().withMessage('Class name is required'),
     body('description').optional(),
+    body('subject').optional(),
+    body('grade_level').optional(),
     validate
   ],
   async (req, res, next) => {
     try {
-      const { name, description } = req.body;
-      const teacherId = req.user.id;
+      const { name, description, subject, grade_level } = req.body;
+      const userId = req.user.id;
+
+      // Get the teacher_id for the authenticated user
+      let { data: teacherData, error: teacherError } = await supabaseAdmin
+        .from('teachers')
+        .select('id')
+        .eq('auth_user_id', userId)
+        .single();
+
+      // If teacher not found, create one
+      if (teacherError && teacherError.code === 'PGRST116') {
+        console.log('Creating teacher record for user:', userId);
+
+        const { data: newTeacher, error: insertError } = await supabaseAdmin
+          .from('teachers')
+          .insert({
+            auth_user_id: userId,
+            name: req.user.user_metadata?.full_name || req.user.email,
+            email: req.user.email
+          })
+          .select()
+          .single();
+
+        if (insertError) {
+          console.error('Error creating teacher record:', insertError);
+          throw new ApiError(500, 'Failed to create teacher profile');
+        }
+
+        teacherData = newTeacher;
+        console.log('Teacher record created successfully:', teacherData.id);
+      } else if (teacherError) {
+        console.error('Error fetching teacher record:', teacherError);
+        throw new ApiError(404, 'Teacher profile not found');
+      }
+
+      const teacherId = teacherData.id;
 
       // Create new class
       const { data, error } = await supabase
@@ -69,6 +156,8 @@ router.post(
         .insert({
           name,
           description,
+          subject,
+          grade_level,
           teacher_id: teacherId
         })
         .select()
@@ -106,6 +195,41 @@ router.get(
       const { id } = req.params;
       const userId = req.user.id;
 
+      // Get the teacher_id for the authenticated user
+      let { data: teacherData, error: teacherError } = await supabaseAdmin
+        .from('teachers')
+        .select('id')
+        .eq('auth_user_id', userId)
+        .single();
+
+      // If teacher not found, create one
+      if (teacherError && teacherError.code === 'PGRST116') {
+        console.log('Creating teacher record for user:', userId);
+
+        const { data: newTeacher, error: insertError } = await supabaseAdmin
+          .from('teachers')
+          .insert({
+            auth_user_id: userId,
+            name: req.user.user_metadata?.full_name || req.user.email,
+            email: req.user.email
+          })
+          .select()
+          .single();
+
+        if (insertError) {
+          console.error('Error creating teacher record:', insertError);
+          throw new ApiError(500, 'Failed to create teacher profile');
+        }
+
+        teacherData = newTeacher;
+        console.log('Teacher record created successfully:', teacherData.id);
+      } else if (teacherError) {
+        console.error('Error fetching teacher record:', teacherError);
+        throw new ApiError(404, 'Teacher profile not found');
+      }
+
+      const teacherId = teacherData.id;
+
       // Get class details
       const { data: classData, error: classError } = await supabase
         .from('classes')
@@ -113,10 +237,12 @@ router.get(
           id,
           name,
           description,
+          subject,
+          grade_level,
           created_at,
           updated_at,
           teacher_id,
-          teachers:teacher_id(id, email, user_metadata)
+          teachers:teacher_id(id, name, email)
         `)
         .eq('id', id)
         .single();
@@ -126,7 +252,7 @@ router.get(
       }
 
       // Check if user is the teacher of this class
-      if (classData.teacher_id !== userId) {
+      if (classData.teacher_id !== teacherId) {
         throw new ApiError(403, 'You do not have permission to view this class');
       }
 
@@ -135,7 +261,7 @@ router.get(
         .from('class_students')
         .select(`
           student_id,
-          students:student_id(id, email, user_metadata)
+          students:student_id(id, name, matric_number, email)
         `)
         .eq('class_id', id);
 
@@ -188,13 +314,28 @@ router.patch(
     param('id').isUUID().withMessage('Invalid class ID'),
     body('name').optional(),
     body('description').optional(),
+    body('subject').optional(),
+    body('grade_level').optional(),
     validate
   ],
   async (req, res, next) => {
     try {
       const { id } = req.params;
-      const { name, description } = req.body;
+      const { name, description, subject, grade_level } = req.body;
       const userId = req.user.id;
+
+      // Get the teacher_id for the authenticated user
+      const { data: teacherData, error: teacherError } = await supabase
+        .from('teachers')
+        .select('id')
+        .eq('auth_user_id', userId)
+        .single();
+
+      if (teacherError) {
+        throw new ApiError(404, 'Teacher profile not found');
+      }
+
+      const teacherId = teacherData.id;
 
       // Check if class exists and user is the teacher
       const { data: existingClass, error: checkError } = await supabase
@@ -207,7 +348,7 @@ router.patch(
         throw new ApiError(404, 'Class not found');
       }
 
-      if (existingClass.teacher_id !== userId) {
+      if (existingClass.teacher_id !== teacherId) {
         throw new ApiError(403, 'You do not have permission to update this class');
       }
 
@@ -215,6 +356,8 @@ router.patch(
       const updateData = {};
       if (name) updateData.name = name;
       if (description !== undefined) updateData.description = description;
+      if (subject) updateData.subject = subject;
+      if (grade_level) updateData.grade_level = grade_level;
 
       const { data, error } = await supabase
         .from('classes')
@@ -256,6 +399,19 @@ router.delete(
       const { id } = req.params;
       const userId = req.user.id;
 
+      // Get the teacher_id for the authenticated user
+      const { data: teacherData, error: teacherError } = await supabase
+        .from('teachers')
+        .select('id')
+        .eq('auth_user_id', userId)
+        .single();
+
+      if (teacherError) {
+        throw new ApiError(404, 'Teacher profile not found');
+      }
+
+      const teacherId = teacherData.id;
+
       // Check if class exists and user is the teacher
       const { data: existingClass, error: checkError } = await supabase
         .from('classes')
@@ -267,7 +423,7 @@ router.delete(
         throw new ApiError(404, 'Class not found');
       }
 
-      if (existingClass.teacher_id !== userId) {
+      if (existingClass.teacher_id !== teacherId) {
         throw new ApiError(403, 'You do not have permission to delete this class');
       }
 
@@ -311,6 +467,19 @@ router.post(
       const { student_ids } = req.body;
       const userId = req.user.id;
 
+      // Get the teacher_id for the authenticated user
+      const { data: teacherData, error: teacherError } = await supabase
+        .from('teachers')
+        .select('id')
+        .eq('auth_user_id', userId)
+        .single();
+
+      if (teacherError) {
+        throw new ApiError(404, 'Teacher profile not found');
+      }
+
+      const teacherId = teacherData.id;
+
       // Check if class exists and user is the teacher
       const { data: existingClass, error: checkError } = await supabase
         .from('classes')
@@ -322,7 +491,7 @@ router.post(
         throw new ApiError(404, 'Class not found');
       }
 
-      if (existingClass.teacher_id !== userId) {
+      if (existingClass.teacher_id !== teacherId) {
         throw new ApiError(403, 'You do not have permission to add students to this class');
       }
 
@@ -368,6 +537,19 @@ router.delete(
       const { id, studentId } = req.params;
       const userId = req.user.id;
 
+      // Get the teacher_id for the authenticated user
+      const { data: teacherData, error: teacherError } = await supabase
+        .from('teachers')
+        .select('id')
+        .eq('auth_user_id', userId)
+        .single();
+
+      if (teacherError) {
+        throw new ApiError(404, 'Teacher profile not found');
+      }
+
+      const teacherId = teacherData.id;
+
       // Check if class exists and user is the teacher
       const { data: existingClass, error: checkError } = await supabase
         .from('classes')
@@ -379,7 +561,7 @@ router.delete(
         throw new ApiError(404, 'Class not found');
       }
 
-      if (existingClass.teacher_id !== userId) {
+      if (existingClass.teacher_id !== teacherId) {
         throw new ApiError(403, 'You do not have permission to remove students from this class');
       }
 

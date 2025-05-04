@@ -40,7 +40,7 @@ router.get('/profile', authenticateToken, async (req, res, next) => {
  * @desc Test endpoint that doesn't require authentication
  * @access Public
  */
-router.get('/test', async (req, res) => {
+router.get('/test', async (_, res) => {
   res.status(200).json({
     status: 'success',
     message: 'User API is working',

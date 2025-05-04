@@ -152,7 +152,7 @@ export const Layout: React.FC<LayoutProps> = ({
   // No sidebar toggle needed
 
   return (
-    <div className="flex flex-col min-h-screen bg-white">
+    <div className="flex flex-col min-h-screen bg-gray-900 text-gray-100">
       <Header
         navItems={navItems.map(({ label, href }) => ({ label, href }))}
         userName={user?.name || user?.email || 'Teacher'}

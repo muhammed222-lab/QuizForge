@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Layout } from '@/components/layout/layout';
 import { AnimatePresence } from 'framer-motion';
+import { Toaster } from '@/components/ui/toaster';
 
 // Import contexts
 import { AuthProvider } from '@/contexts/AuthContext';
@@ -15,18 +16,20 @@ import AuthPage from '@/pages/auth';
 import DashboardPage from '@/pages/dashboard';
 import ClassesPage from '@/pages/classes';
 import CreateClassPage from '@/pages/classes/create';
+import ClassDetailPage from '@/pages/classes/[id]';
 import ExamsPage from '@/pages/exams';
 import CreateExamPage from '@/pages/exams/create';
 import EditExamPage from '@/pages/exams/edit';
 import StudentsPage from '@/pages/students';
 import AnalyticsPage from '@/pages/analytics';
 import SettingsPage from '@/pages/settings';
-import StudentExamPage from '@/pages/exam';
+import StudentExamPage from '@/pages/student/exam';
 
 function App() {
   return (
     <AuthProvider>
       <Router>
+        <Toaster />
         <AnimatePresence mode="wait">
           <Routes>
             {/* Landing page */}
@@ -59,6 +62,7 @@ function App() {
                       <Route path="dashboard" element={<DashboardPage />} />
                       <Route path="classes" element={<ClassesPage />} />
                       <Route path="classes/create" element={<CreateClassPage />} />
+                      <Route path="classes/:id" element={<ClassDetailPage />} />
                       <Route path="exams" element={<ExamsPage />} />
                       <Route path="exams/create" element={<CreateExamPage />} />
                       <Route path="exams/edit/:id" element={<EditExamPage />} />

@@ -8,6 +8,12 @@ const supabase = createClient(
   process.env.SUPABASE_KEY
 );
 
+// Initialize Supabase client with service role key for admin operations
+const supabaseAdmin = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
+
 /**
  * Middleware to authenticate JWT token
  */
@@ -30,6 +36,38 @@ const authenticateToken = async (req, res, next) => {
 
     // Attach user to request object
     req.user = data.user;
+
+    // Check if teacher record exists and create it if it doesn't
+    try {
+      // Check if teacher record already exists
+      const { data: existingTeacher, error: checkError } = await supabaseAdmin
+        .from('teachers')
+        .select('id')
+        .eq('auth_user_id', data.user.id)
+        .single();
+
+      if (checkError && checkError.code === 'PGRST116') {
+        // Create teacher record if it doesn't exist
+        const { data: teacher, error: insertError } = await supabaseAdmin
+          .from('teachers')
+          .insert({
+            auth_user_id: data.user.id,
+            name: data.user.user_metadata?.full_name || data.user.email,
+            email: data.user.email
+          })
+          .select()
+          .single();
+
+        if (insertError) {
+          console.error('Error creating teacher record:', insertError);
+        } else {
+          console.log('Teacher record created successfully:', teacher.id);
+        }
+      }
+    } catch (err) {
+      console.error('Error checking/creating teacher record:', err);
+    }
+
     next();
   } catch (error) {
     console.error('Authentication error:', error);

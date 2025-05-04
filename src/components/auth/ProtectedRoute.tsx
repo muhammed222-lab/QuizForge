@@ -26,7 +26,12 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     // Only redirect if we're sure the user is not authenticated (not during loading)
     if (!isLoading && !isAuthenticated) {
       console.log('Not authenticated, redirecting to login');
-      navigate(`/auth/login?returnUrl=${encodeURIComponent(location.pathname)}`, { replace: true });
+      // Use a small delay to avoid potential race conditions
+      const redirectTimer = setTimeout(() => {
+        navigate(`/auth/login?returnUrl=${encodeURIComponent(location.pathname)}`, { replace: true });
+      }, 100);
+
+      return () => clearTimeout(redirectTimer);
     }
   }, [isAuthenticated, isLoading, location.pathname, navigate]);
 

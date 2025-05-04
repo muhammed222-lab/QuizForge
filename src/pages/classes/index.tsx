@@ -180,44 +180,46 @@ export default function ClassesPage() {
           >
             {filteredClasses.length > 0 ? (
               filteredClasses.map((classItem) => (
-                <Link key={classItem.id} to={`/classes/${classItem.id}`}>
-                  <Card animate={true} className="h-full cursor-pointer transition-all hover:shadow-md">
-                    <CardContent className="p-6">
-                      <div className="mb-4 flex items-center justify-between">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-100 text-primary-700">
-                          {classItem.subject.charAt(0)}
-                        </div>
-                        <span className="rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-800">
-                          {classItem.grade_level}
-                        </span>
+                <Card key={classItem.id} animate={true} className="h-full transition-all hover:shadow-md">
+                  <CardContent className="p-6">
+                    <div className="mb-4 flex items-center justify-between">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-100 text-primary-700">
+                        {classItem.subject.charAt(0)}
                       </div>
-                      <h3 className="mb-1 text-lg font-semibold">{classItem.name}</h3>
-                      <p className="mb-4 text-sm text-gray-500">{classItem.description}</p>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center text-sm text-gray-500">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="mr-1 h-4 w-4"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
-                            />
-                          </svg>
-                          {classItem.student_count} Students
-                        </div>
-                        <Button variant="ghost" size="sm">
-                          View
-                        </Button>
+                      <span className="rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-800">
+                        {classItem.grade_level}
+                      </span>
+                    </div>
+                    <h3 className="mb-1 text-lg font-semibold">{classItem.name}</h3>
+                    <p className="mb-4 text-sm text-gray-500">{classItem.description}</p>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center text-sm text-gray-500">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="mr-1 h-4 w-4"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+                          />
+                        </svg>
+                        {classItem.student_count} Students
                       </div>
-                    </CardContent>
-                  </Card>
-                </Link>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => navigate(`/app/classes/${classItem.id}`)}
+                      >
+                        View
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
               ))
             ) : (
               <div className="col-span-full flex flex-col items-center justify-center rounded-lg border border-dashed border-gray-300 p-12 text-center">

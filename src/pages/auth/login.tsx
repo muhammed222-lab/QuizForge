@@ -9,8 +9,9 @@ import { useAuth } from '@/contexts/AuthContext';
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { login, loginWithGoogle, error: authError, clearError, isLoading } = useAuth();
+  const { login, loginWithGoogle, error: authError, clearError, isLoading, isAuthenticated } = useAuth();
   const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -32,23 +33,31 @@ export default function LoginPage() {
 
     try {
       console.log('Login form submitted, attempting login...');
+      setIsSubmitting(true);
+
       const success = await login(email, password);
 
       if (success) {
         console.log('Login successful, navigating to:', returnUrl);
-        // Add a small delay to ensure state is updated before navigation
+        // Add a longer delay to ensure state is fully updated before navigation
         setTimeout(() => {
-          navigate(returnUrl);
-        }, 100);
+          console.log('Delayed navigation executing now');
+          navigate(returnUrl, { replace: true });
+        }, 500);
       } else {
         console.log('Login did not return success value');
         // Still try to navigate if authentication is successful
         if (isAuthenticated && !isLoading) {
-          navigate(returnUrl);
+          console.log('Authentication state is valid, navigating');
+          navigate(returnUrl, { replace: true });
+        } else {
+          console.log('Authentication state is not valid, not navigating');
+          setIsSubmitting(false);
         }
       }
     } catch (error) {
       console.error('Login form error:', error);
+      setIsSubmitting(false);
       // Error is handled by auth context
     }
   };
@@ -159,9 +168,10 @@ export default function LoginPage() {
               <Button
                 type="submit"
                 className="w-full bg-green-600 hover:bg-green-700 text-white"
-                isLoading={isLoading}
+                isLoading={isLoading || isSubmitting}
+                disabled={isLoading || isSubmitting}
               >
-                Sign In
+                {isSubmitting ? 'Signing In...' : 'Sign In'}
               </Button>
             </form>
 

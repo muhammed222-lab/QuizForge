@@ -33,7 +33,9 @@ export default function CreateClassPage() {
       // Use the classesApi to create a new class
       await classesApi.createClass({
         name: formData.name,
-        description: formData.description
+        description: formData.description,
+        subject: formData.subject,
+        grade_level: formData.gradeLevel
       });
 
       // Redirect to classes page
@@ -74,7 +76,7 @@ export default function CreateClassPage() {
 
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="space-y-1">
-                  <label htmlFor="subject" className="block text-sm font-medium text-gray-700">
+                  <label htmlFor="subject" className="block text-sm font-medium text-gray-100">
                     Subject
                   </label>
                   <select
@@ -82,7 +84,7 @@ export default function CreateClassPage() {
                     name="subject"
                     value={formData.subject}
                     onChange={handleChange}
-                    className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                    className="w-full rounded-md border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-gray-100 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
                     required
                   >
                     <option value="" disabled>Select a subject</option>
@@ -101,7 +103,7 @@ export default function CreateClassPage() {
                 </div>
 
                 <div className="space-y-1">
-                  <label htmlFor="gradeLevel" className="block text-sm font-medium text-gray-700">
+                  <label htmlFor="gradeLevel" className="block text-sm font-medium text-gray-100">
                     Grade Level
                   </label>
                   <select
@@ -109,7 +111,7 @@ export default function CreateClassPage() {
                     name="gradeLevel"
                     value={formData.gradeLevel}
                     onChange={handleChange}
-                    className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                    className="w-full rounded-md border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-gray-100 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
                     required
                   >
                     <option value="" disabled>Select a grade level</option>
@@ -126,7 +128,7 @@ export default function CreateClassPage() {
               </div>
 
               <div className="space-y-1">
-                <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="description" className="block text-sm font-medium text-gray-100">
                   Description
                 </label>
                 <textarea
@@ -135,13 +137,13 @@ export default function CreateClassPage() {
                   value={formData.description}
                   onChange={handleChange}
                   rows={4}
-                  className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                  className="w-full rounded-md border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-gray-100 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 placeholder:text-gray-500"
                   placeholder="Provide a brief description of the class"
                 />
               </div>
 
               {error && (
-                <div className="rounded-md bg-red-50 p-4">
+                <div className="rounded-md bg-red-900 p-4">
                   <div className="flex">
                     <div className="flex-shrink-0">
                       <svg
@@ -159,8 +161,8 @@ export default function CreateClassPage() {
                       </svg>
                     </div>
                     <div className="ml-3">
-                      <h3 className="text-sm font-medium text-red-800">Error creating class</h3>
-                      <div className="mt-2 text-sm text-red-700">{error}</div>
+                      <h3 className="text-sm font-medium text-red-300">Error creating class</h3>
+                      <div className="mt-2 text-sm text-red-300">{error}</div>
                     </div>
                   </div>
                 </div>
@@ -174,7 +176,12 @@ export default function CreateClassPage() {
               >
                 Cancel
               </Button>
-              <Button type="submit" isLoading={loading}>
+              <Button
+                type="submit"
+                isLoading={loading}
+                className="px-6 py-2 text-base font-medium"
+                size="lg"
+              >
                 Create Class
               </Button>
             </CardFooter>
@@ -189,7 +196,7 @@ export default function CreateClassPage() {
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           <Card>
             <CardContent className="p-6">
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary-100 text-primary-700">
+              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary-900 text-primary-400">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-6 w-6"
@@ -205,8 +212,8 @@ export default function CreateClassPage() {
                   />
                 </svg>
               </div>
-              <h3 className="mb-2 text-lg font-medium">Upload Student Roster</h3>
-              <p className="text-sm text-gray-500">
+              <h3 className="mb-2 text-lg font-medium text-gray-100">Upload Student Roster</h3>
+              <p className="text-sm text-gray-400">
                 Import your student list using a CSV file with names and matriculation numbers.
               </p>
             </CardContent>
@@ -214,7 +221,7 @@ export default function CreateClassPage() {
 
           <Card>
             <CardContent className="p-6">
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-secondary-100 text-secondary-700">
+              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-secondary-900 text-secondary-400">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-6 w-6"
@@ -230,8 +237,8 @@ export default function CreateClassPage() {
                   />
                 </svg>
               </div>
-              <h3 className="mb-2 text-lg font-medium">Add Learning Materials</h3>
-              <p className="text-sm text-gray-500">
+              <h3 className="mb-2 text-lg font-medium text-gray-100">Add Learning Materials</h3>
+              <p className="text-sm text-gray-400">
                 Upload PDFs, documents, and other learning materials for your class.
               </p>
             </CardContent>
@@ -239,7 +246,7 @@ export default function CreateClassPage() {
 
           <Card>
             <CardContent className="p-6">
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-accent-100 text-accent-700">
+              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-accent-900 text-accent-400">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-6 w-6"
@@ -255,8 +262,8 @@ export default function CreateClassPage() {
                   />
                 </svg>
               </div>
-              <h3 className="mb-2 text-lg font-medium">Create an Exam</h3>
-              <p className="text-sm text-gray-500">
+              <h3 className="mb-2 text-lg font-medium text-gray-100">Create an Exam</h3>
+              <p className="text-sm text-gray-400">
                 Generate AI-powered quizzes and exams based on your uploaded materials.
               </p>
             </CardContent>

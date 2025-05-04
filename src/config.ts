@@ -29,6 +29,7 @@ export const API_CONFIG = {
       DETAIL: (id: string) => `/exams/${id}`,
       GENERATE: (id: string) => `/exams/${id}/generate`,
       PUBLISH: (id: string) => `/exams/${id}/publish`,
+      ACCESS: (id: string, code: string) => `/exams/${id}/access?code=${code}`,
     },
     STUDENTS: {
       BASE: '/students',
@@ -40,6 +41,24 @@ export const API_CONFIG = {
       BASE: '/questions',
       DETAIL: (id: string) => `/questions/${id}`,
       BULK: '/questions/bulk',
+    },
+    MATERIALS: {
+      BASE: '/materials',
+      DETAIL: (id: string) => `/materials/${id}`,
+      PROCESS: '/materials/process',
+    },
+    SUBMISSIONS: {
+      BASE: '/submissions',
+      DETAIL: (id: string) => `/submissions/${id}`,
+      SUBMIT: '/submissions',
+    },
+    ANALYTICS: {
+      OVERVIEW: '/analytics/overview',
+      PERFORMANCE: '/analytics/performance',
+    },
+    DASHBOARD: {
+      STATS: '/dashboard/stats',
+      RECENT: '/dashboard/recent',
     },
     STORAGE: {
       CONFIRM: '/storage/confirm',
@@ -61,6 +80,7 @@ export const SUPABASE_CONFIG = {
   STORAGE: {
     BUCKETS: {
       DOCUMENTS: 'documents',
+      MATERIALS: 'materials',
       AVATARS: 'avatars',
     },
   },

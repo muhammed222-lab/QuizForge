@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { supabase } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AnimatedContainer } from '@/components/ui/animated-container';
 import { PageHeader, PageSection } from '@/components/layout/main-content';
 import { Skeleton, SkeletonCard } from '@/components/ui/skeleton';
+import { analyticsApi } from '@/lib/api';
 
 // No mock data needed
 
@@ -27,40 +27,24 @@ export default function AnalyticsPage() {
     const fetchAnalyticsData = async () => {
       try {
         // Fetch analytics data from API
-        const { data: classesData, error: classesError } = await supabase
-          .from('classes')
-          .select('id, name')
-          .order('name');
+        const response = await analyticsApi.getOverview(
+          timeRange,
+          classFilter
+        );
 
-        if (classesError) throw classesError;
+        if (response && response.data) {
+          // Set classes
+          setClasses(response.data.classes || []);
 
-        // Get exam stats
-        const { data: examsData, error: examsError } = await supabase
-          .from('exams')
-          .select('*');
+          // Set stats
+          setStats({
+            totalExams: response.data.stats?.totalExams || 0,
+            totalStudents: response.data.stats?.totalStudents || 0,
+            averageScore: response.data.stats?.averageScore || 0,
+            completionRate: response.data.stats?.completionRate || 0,
+          });
+        }
 
-        if (examsError) throw examsError;
-
-        // Get student stats
-        const { data: studentsData, error: studentsError } = await supabase
-          .from('students')
-          .select('*');
-
-        if (studentsError) throw studentsError;
-
-        // Calculate stats
-        const totalExams = examsData?.length || 0;
-        const totalStudents = studentsData?.length || 0;
-
-        // Set the data
-        setStats({
-          totalExams,
-          totalStudents,
-          averageScore: 0, // Would calculate from actual data
-          completionRate: 0, // Would calculate from actual data
-        });
-
-        setClasses(classesData || []);
         setLoading(false);
       } catch (error) {
         console.error('Error fetching analytics data:', error);

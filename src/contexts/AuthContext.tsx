@@ -220,44 +220,37 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         const userData = response.data.user;
 
         // Set session in Supabase client for future requests
-        await supabase.auth.setSession({
-          access_token: response.data.session.access_token,
-          refresh_token: response.data.session.refresh_token
-        });
-
-        console.log('Session set in Supabase client');
+        try {
+          await supabase.auth.setSession({
+            access_token: response.data.session.access_token,
+            refresh_token: response.data.session.refresh_token
+          });
+          console.log('Session set in Supabase client');
+        } catch (sessionError) {
+          console.error('Error setting session in Supabase client:', sessionError);
+          // Continue with login even if setting session fails
+        }
 
         // Set user data immediately to avoid loading state issues
-        setUser({
+        const userObj = {
           id: userData.id,
           email: userData.email || '',
           name: userData.name || userData.email,
           role: userData.role || 'teacher',
           avatar: userData.avatar || null
-        });
+        };
+
+        console.log('Setting user data:', userObj);
+        setUser(userObj);
+
+        // Important: Set authenticated state after user data is set
+        console.log('Setting authenticated state to true');
         setIsAuthenticated(true);
 
-        // Try to get additional profile data, but don't block the login flow
-        try {
-          console.log('Fetching additional profile data');
-          const userProfile = await userApi.getProfile();
+        // Don't fetch additional profile data during login to avoid delays
+        // We'll fetch it later if needed
 
-          if (userProfile && userProfile.data) {
-            console.log('Profile data fetched successfully');
-            setUser(prevUser => {
-              if (!prevUser) return prevUser; // Safety check
-              return {
-                ...prevUser,
-                name: userProfile.data.name || prevUser.name,
-                avatar: userProfile.data.avatar || prevUser.avatar
-              };
-            });
-          }
-        } catch (profileError) {
-          console.error('Error fetching user profile after login:', profileError);
-          // We already set the user data above, so this is just for additional info
-        }
-
+        console.log('Login complete, returning success');
         return true; // Indicate successful login
       } else {
         console.error('Login response missing user data:', response);
@@ -266,8 +259,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     } catch (error) {
       console.error('Login error:', error);
       setError(error instanceof Error ? error.message : 'An unexpected error occurred');
+      setIsLoading(false); // Make sure to set loading to false on error
       throw error;
     } finally {
+      console.log('Setting loading state to false');
       setIsLoading(false);
     }
   };

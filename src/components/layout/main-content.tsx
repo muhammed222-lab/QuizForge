@@ -14,7 +14,7 @@ export const MainContent = React.forwardRef<HTMLDivElement, MainContentProps>(
       <main
         ref={ref}
         className={cn(
-          'flex-1 transition-all duration-300 bg-white overflow-y-auto',
+          'flex-1 transition-all duration-300 bg-gray-900 overflow-y-auto',
           className
         )}
         {...props}
@@ -86,7 +86,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
         >
-          <h1 className="text-2xl font-bold text-black sm:text-3xl">
+          <h1 className="text-2xl font-bold text-gray-100 sm:text-3xl">
             {title}
           </h1>
           {description && (
@@ -131,14 +131,14 @@ export const PageSection: React.FC<PageSectionProps> = ({
 
   return (
     <section
-      className={cn('mb-8 rounded-lg border border-gray-200 bg-white shadow-sm', className)}
+      className={cn('mb-8 rounded-lg border border-gray-700 bg-gray-800 shadow-sm', className)}
       {...props}
     >
       {(title || description || actions) && (
-        <div className="flex flex-col border-b border-gray-200 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col border-b border-gray-700 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             {title && (
-              <h2 className="text-lg font-medium text-black">
+              <h2 className="text-lg font-medium text-gray-100">
                 {title}
                 {collapsible && (
                   <button

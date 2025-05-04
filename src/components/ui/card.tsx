@@ -7,7 +7,7 @@ const Card = React.forwardRef<
   React.HTMLAttributes<HTMLDivElement> & { animate?: boolean } & MotionProps
 >(({ className, animate = true, children, ...props }, ref) => {
   const CardComponent = animate ? motion.div : 'div';
-  
+
   const animationProps = animate
     ? {
         whileHover: { y: -5, boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)' },
@@ -19,7 +19,7 @@ const Card = React.forwardRef<
     <CardComponent
       ref={ref}
       className={cn(
-        'rounded-lg border border-gray-200 bg-white shadow-sm transition-all duration-200',
+        'rounded-lg border border-gray-700 bg-gray-800 shadow-sm transition-all duration-200',
         className
       )}
       {...animationProps}
@@ -49,7 +49,7 @@ const CardTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <h3
     ref={ref}
-    className={cn('text-xl font-semibold leading-none tracking-tight', className)}
+    className={cn('text-xl font-semibold leading-none tracking-tight text-gray-100', className)}
     {...props}
   />
 ));
@@ -61,7 +61,7 @@ const CardDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <p
     ref={ref}
-    className={cn('text-sm text-gray-500', className)}
+    className={cn('text-sm text-gray-400', className)}
     {...props}
   />
 ));

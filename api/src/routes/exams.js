@@ -329,7 +329,7 @@ router.post(
   requireTeacher,
   [
     param('id').isUUID().withMessage('Invalid exam ID'),
-    body('document_id').optional().isUUID().withMessage('Invalid document ID'),
+    body('material_id').optional().isUUID().withMessage('Invalid material ID'),
     body('num_questions').isInt({ min: 1, max: 50 }).withMessage('Number of questions must be between 1 and 50'),
     body('question_types').optional().isArray().withMessage('Question types must be an array'),
     validate
@@ -337,13 +337,13 @@ router.post(
   async (req, res, next) => {
     try {
       const { id } = req.params;
-      const { document_id, num_questions, question_types } = req.body;
+      const { material_id, num_questions, question_types } = req.body;
       const userId = req.user.id;
 
       // Check if exam exists and user is the teacher
       const { data: existingExam, error: checkError } = await supabase
         .from('exams')
-        .select('teacher_id')
+        .select('teacher_id, class_id')
         .eq('id', id)
         .single();
 
@@ -355,16 +355,75 @@ router.post(
         throw new ApiError(403, 'You do not have permission to generate questions for this exam');
       }
 
-      // TODO: Implement AI question generation
-      // This would typically call an external AI service or use a local model
-      // For now, we'll just return a success message
+      // If material_id is provided, check if it exists and belongs to the same class
+      if (material_id) {
+        const { data: materialData, error: materialError } = await supabase
+          .from('materials')
+          .select('class_id, teacher_id')
+          .eq('id', material_id)
+          .single();
+
+        if (materialError) {
+          throw new ApiError(404, 'Material not found');
+        }
+
+        if (materialData.teacher_id !== userId) {
+          throw new ApiError(403, 'You do not have permission to use this material');
+        }
+
+        if (materialData.class_id !== existingExam.class_id) {
+          throw new ApiError(400, 'Material must belong to the same class as the exam');
+        }
+
+        // Update exam with material_id
+        await supabase
+          .from('exams')
+          .update({ material_id })
+          .eq('id', id);
+      }
+
+      // In a real implementation, this would generate AI questions
+      // For this demo, we'll generate some mock questions
+      const questionTypes = question_types || ['multiple_choice', 'true_false', 'short_answer'];
+      const mockQuestions = [];
+
+      for (let i = 0; i < num_questions; i++) {
+        const type = questionTypes[i % questionTypes.length];
+        let question = {
+          exam_id: id,
+          question_text: `Sample question ${i + 1} for exam ${id}`,
+          question_type: type,
+          points: 1
+        };
+
+        if (type === 'multiple_choice') {
+          question.options = ['Option A', 'Option B', 'Option C', 'Option D'];
+          question.correct_answer = 0; // Index of correct option
+        } else if (type === 'true_false') {
+          question.options = ['True', 'False'];
+          question.correct_answer = Math.random() > 0.5 ? 0 : 1;
+        } else if (type === 'short_answer') {
+          question.correct_answer = 'Sample answer';
+        }
+
+        mockQuestions.push(question);
+      }
+
+      // Insert the mock questions
+      const { data: questions, error: questionsError } = await supabase
+        .from('questions')
+        .insert(mockQuestions)
+        .select();
+
+      if (questionsError) {
+        throw new ApiError(500, questionsError.message);
+      }
 
       res.status(200).json({
         status: 'success',
-        message: 'Question generation started',
+        message: `${questions.length} questions generated successfully`,
         data: {
-          job_id: 'mock-job-id', // In a real implementation, this would be a job ID to check status
-          estimated_completion_time: '30 seconds'
+          questions
         }
       });
     } catch (error) {
