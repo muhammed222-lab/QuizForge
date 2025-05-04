@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QuizForge - AI-Powered Exam Creation</title>
+    <!-- Initialize theme to prevent flash -->
+    <script>
+      (function() {
+        try {
+          // Check for saved theme
+          const theme = localStorage.getItem('quizforge_theme') || 'light';
+
+          // Remove both classes first to ensure clean state
+          document.documentElement.classList.remove('light');
+          document.documentElement.classList.remove('dark');
+
+          // Check system preference if no saved theme
+          if (!localStorage.getItem('quizforge_theme')) {
+            if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+              document.documentElement.classList.add('dark');
+              localStorage.setItem('quizforge_theme', 'dark');
+            } else {
+              document.documentElement.classList.add('light');
+              localStorage.setItem('quizforge_theme', 'light');
+            }
+          } else {
+            // Add the saved theme class
+            document.documentElement.classList.add(theme);
+          }
+
+          console.log('Initial theme set to:', theme);
+        } catch (e) {
+          console.error('Error setting initial theme:', e);
+        }
+      })();
+    </script>
+  </head>
+  <body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
