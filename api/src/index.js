@@ -6,6 +6,7 @@ const morgan = require('morgan');
 
 // Import routes
 const authRoutes = require('./routes/auth');
+const userRoutes = require('./routes/user');
 const classesRoutes = require('./routes/classes');
 const examsRoutes = require('./routes/exams');
 const studentsRoutes = require('./routes/students');
@@ -32,6 +33,7 @@ app.get('/api/health', (req, res) => {
 
 // Apply routes
 app.use('/api/auth', authRoutes);
+app.use('/api/user', userRoutes);
 app.use('/api/classes', authenticateToken, classesRoutes);
 app.use('/api/exams', authenticateToken, examsRoutes);
 app.use('/api/students', authenticateToken, studentsRoutes);

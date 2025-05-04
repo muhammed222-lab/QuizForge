@@ -31,9 +31,24 @@ export default function LoginPage() {
     clearError();
 
     try {
-      await login(email, password);
-      navigate(returnUrl);
+      console.log('Login form submitted, attempting login...');
+      const success = await login(email, password);
+
+      if (success) {
+        console.log('Login successful, navigating to:', returnUrl);
+        // Add a small delay to ensure state is updated before navigation
+        setTimeout(() => {
+          navigate(returnUrl);
+        }, 100);
+      } else {
+        console.log('Login did not return success value');
+        // Still try to navigate if authentication is successful
+        if (isAuthenticated && !isLoading) {
+          navigate(returnUrl);
+        }
+      }
     } catch (error) {
+      console.error('Login form error:', error);
       // Error is handled by auth context
     }
   };

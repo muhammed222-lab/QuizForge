@@ -22,6 +22,10 @@ class ApiService {
     const { data } = await supabase.auth.getSession();
     const token = data.session?.access_token;
 
+    if (!token) {
+      console.warn('No authentication token available');
+    }
+
     return {
       ...this.headers,
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -49,8 +53,13 @@ class ApiService {
     });
 
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'An error occurred');
+      try {
+        const error = await response.json();
+        throw new Error(error.message || 'An error occurred');
+      } catch (jsonError) {
+        // If response is not JSON
+        throw new Error(`Request failed with status ${response.status}`);
+      }
     }
 
     return response.json();
@@ -68,8 +77,13 @@ class ApiService {
     });
 
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'An error occurred');
+      try {
+        const error = await response.json();
+        throw new Error(error.message || 'An error occurred');
+      } catch (jsonError) {
+        // If response is not JSON
+        throw new Error(`Request failed with status ${response.status}`);
+      }
     }
 
     return response.json();
@@ -87,8 +101,13 @@ class ApiService {
     });
 
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'An error occurred');
+      try {
+        const error = await response.json();
+        throw new Error(error.message || 'An error occurred');
+      } catch (jsonError) {
+        // If response is not JSON
+        throw new Error(`Request failed with status ${response.status}`);
+      }
     }
 
     return response.json();
@@ -105,8 +124,13 @@ class ApiService {
     });
 
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'An error occurred');
+      try {
+        const error = await response.json();
+        throw new Error(error.message || 'An error occurred');
+      } catch (jsonError) {
+        // If response is not JSON
+        throw new Error(`Request failed with status ${response.status}`);
+      }
     }
 
     return response.json();

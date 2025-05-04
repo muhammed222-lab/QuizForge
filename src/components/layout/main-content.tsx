@@ -14,7 +14,7 @@ export const MainContent = React.forwardRef<HTMLDivElement, MainContentProps>(
       <main
         ref={ref}
         className={cn(
-          'flex-1 transition-all duration-300 bg-gray-50 overflow-y-auto',
+          'flex-1 transition-all duration-300 bg-white overflow-y-auto',
           className
         )}
         {...props}

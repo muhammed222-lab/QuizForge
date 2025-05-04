@@ -6,7 +6,7 @@ import { Switch } from '@/components/ui/switch';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { PageHeader } from '@/components/layout/main-content';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/lib/supabase/client';
+import { userApi } from '@/lib/api/user';
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState('profile');
@@ -34,16 +34,10 @@ export default function SettingsPage() {
         department: '',
       });
 
-      // Fetch additional user data from the database
+      // Fetch additional user data from the API
       const fetchUserData = async () => {
         try {
-          const { data, error } = await supabase
-            .from('teachers')
-            .select('*')
-            .eq('id', user.id)
-            .single();
-
-          if (error) throw error;
+          const data = await userApi.getProfile();
 
           if (data) {
             setProfileForm(prev => ({
@@ -109,26 +103,19 @@ export default function SettingsPage() {
     setSuccess(null);
 
     try {
-      // Update user metadata
-      const { error: updateError } = await supabase.auth.updateUser({
-        data: {
-          name: profileForm.name
-        }
+      // Update user profile through the API
+      await userApi.updateProfile({
+        name: profileForm.name,
+        institution: profileForm.institution,
+        department: profileForm.department
       });
 
-      if (updateError) throw updateError;
-
-      // Update teacher record
-      const { error: teacherError } = await supabase
-        .from('teachers')
-        .update({
-          name: profileForm.name,
-          institution: profileForm.institution,
-          department: profileForm.department
-        })
-        .eq('id', user.id);
-
-      if (teacherError) throw teacherError;
+      // Update local auth context
+      if (user.name !== profileForm.name) {
+        // This would typically be handled by the API response
+        // but we'll update the local context for immediate feedback
+        user.name = profileForm.name;
+      }
 
       setSuccess('Profile updated successfully');
       setTimeout(() => setSuccess(null), 3000);
@@ -145,9 +132,13 @@ export default function SettingsPage() {
     setSuccess(null);
 
     try {
-      // In a real app, this would be an actual Supabase update
-      // For now, we'll simulate a delay and then show success
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Update notification settings through API
+      await userApi.updateNotificationSettings({
+        email_notifications: notificationSettings.emailNotifications,
+        exam_submissions: notificationSettings.examSubmissions,
+        new_students: notificationSettings.newStudents,
+        system_updates: notificationSettings.systemUpdates
+      });
 
       setSuccess('Notification settings updated successfully');
       setTimeout(() => setSuccess(null), 3000);
@@ -164,9 +155,12 @@ export default function SettingsPage() {
     setSuccess(null);
 
     try {
-      // In a real app, this would be an actual Supabase update
-      // For now, we'll simulate a delay and then show success
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Update appearance settings through API
+      await userApi.updateAppearanceSettings({
+        theme: appearanceSettings.theme,
+        font_size: appearanceSettings.fontSize,
+        high_contrast: appearanceSettings.highContrast
+      });
 
       setSuccess('Appearance settings updated successfully');
       setTimeout(() => setSuccess(null), 3000);
@@ -192,12 +186,11 @@ export default function SettingsPage() {
         throw new Error('Password must be at least 8 characters long');
       }
 
-      // Update password using Supabase
-      const { error } = await supabase.auth.updateUser({
-        password: securityForm.newPassword
+      // Update password using API
+      await userApi.updatePassword({
+        current_password: securityForm.currentPassword,
+        new_password: securityForm.newPassword
       });
-
-      if (error) throw error;
 
       setSuccess('Password changed successfully');
       setSecurityForm({

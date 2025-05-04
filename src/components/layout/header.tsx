@@ -11,6 +11,7 @@ interface NavItem {
 interface HeaderProps {
   navItems?: NavItem[];
   userName?: string;
+  userAvatar?: string | null;
   onLogout?: () => void;
   children?: React.ReactNode;
 }
@@ -18,6 +19,7 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({
   navItems = [],
   userName,
+  userAvatar,
   onLogout,
   children,
 }) => {
@@ -124,9 +126,17 @@ export const Header: React.FC<HeaderProps> = ({
                 onClick={() => setIsProfileOpen(!isProfileOpen)}
               >
                 <div className="relative h-8 w-8 overflow-hidden rounded-full">
-                  <div className="flex h-full w-full items-center justify-center bg-green-100 text-green-700">
-                    {userName ? userName.charAt(0).toUpperCase() : 'U'}
-                  </div>
+                  {userAvatar ? (
+                    <img
+                      src={userAvatar}
+                      alt={userName || 'User'}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center bg-green-100 text-green-700">
+                      {userName ? userName.charAt(0).toUpperCase() : 'U'}
+                    </div>
+                  )}
                 </div>
 
                 <span className="hidden md:block text-sm font-medium text-black">

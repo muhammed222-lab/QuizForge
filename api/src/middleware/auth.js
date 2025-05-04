@@ -24,6 +24,7 @@ const authenticateToken = async (req, res, next) => {
     const { data, error } = await supabase.auth.getUser(token);
 
     if (error || !data.user) {
+      console.error('Token verification error:', error);
       throw new ApiError(401, 'Invalid or expired token');
     }
 
@@ -31,6 +32,7 @@ const authenticateToken = async (req, res, next) => {
     req.user = data.user;
     next();
   } catch (error) {
+    console.error('Authentication error:', error);
     next(error);
   }
 };
@@ -54,8 +56,8 @@ const requireAdmin = (req, res, next) => {
  */
 const requireTeacher = (req, res, next) => {
   try {
-    if (!req.user || 
-        (req.user.user_metadata.role !== 'teacher' && 
+    if (!req.user ||
+        (req.user.user_metadata.role !== 'teacher' &&
          req.user.user_metadata.role !== 'admin')) {
       throw new ApiError(403, 'Access denied: Teacher privileges required');
     }
