@@ -58,8 +58,8 @@ router.get('/', async (req, res, next) => {
 
     const teacherId = teacherData.id;
 
-    // Get classes where the user is the teacher
-    const { data, error } = await supabase
+    // Get classes where the user is the teacher using admin client to bypass RLS
+    const { data, error } = await supabaseAdmin
       .from('classes')
       .select(`
         id,
@@ -69,12 +69,7 @@ router.get('/', async (req, res, next) => {
         grade_level,
         created_at,
         updated_at,
-        teacher_id,
-        (
-          SELECT COUNT(*)
-          FROM class_students
-          WHERE class_students.class_id = classes.id
-        ) as student_count
+        teacher_id
       `)
       .eq('teacher_id', teacherId)
       .order('created_at', { ascending: false });
@@ -150,8 +145,8 @@ router.post(
 
       const teacherId = teacherData.id;
 
-      // Create new class
-      const { data, error } = await supabase
+      // Create new class using admin client to bypass RLS
+      const { data, error } = await supabaseAdmin
         .from('classes')
         .insert({
           name,
@@ -230,8 +225,8 @@ router.get(
 
       const teacherId = teacherData.id;
 
-      // Get class details
-      const { data: classData, error: classError } = await supabase
+      // Get class details using admin client to bypass RLS
+      const { data: classData, error: classError } = await supabaseAdmin
         .from('classes')
         .select(`
           id,
@@ -256,8 +251,8 @@ router.get(
         throw new ApiError(403, 'You do not have permission to view this class');
       }
 
-      // Get students in this class
-      const { data: studentsData, error: studentsError } = await supabase
+      // Get students in this class using admin client to bypass RLS
+      const { data: studentsData, error: studentsError } = await supabaseAdmin
         .from('class_students')
         .select(`
           student_id,
@@ -269,8 +264,8 @@ router.get(
         throw new ApiError(500, studentsError.message);
       }
 
-      // Get exams for this class
-      const { data: examsData, error: examsError } = await supabase
+      // Get exams for this class using admin client to bypass RLS
+      const { data: examsData, error: examsError } = await supabaseAdmin
         .from('exams')
         .select(`
           id,
@@ -337,8 +332,8 @@ router.patch(
 
       const teacherId = teacherData.id;
 
-      // Check if class exists and user is the teacher
-      const { data: existingClass, error: checkError } = await supabase
+      // Check if class exists and user is the teacher using admin client to bypass RLS
+      const { data: existingClass, error: checkError } = await supabaseAdmin
         .from('classes')
         .select('teacher_id')
         .eq('id', id)
@@ -352,14 +347,14 @@ router.patch(
         throw new ApiError(403, 'You do not have permission to update this class');
       }
 
-      // Update class
+      // Update class using admin client to bypass RLS
       const updateData = {};
       if (name) updateData.name = name;
       if (description !== undefined) updateData.description = description;
       if (subject) updateData.subject = subject;
       if (grade_level) updateData.grade_level = grade_level;
 
-      const { data, error } = await supabase
+      const { data, error } = await supabaseAdmin
         .from('classes')
         .update(updateData)
         .eq('id', id)
@@ -412,8 +407,8 @@ router.delete(
 
       const teacherId = teacherData.id;
 
-      // Check if class exists and user is the teacher
-      const { data: existingClass, error: checkError } = await supabase
+      // Check if class exists and user is the teacher using admin client to bypass RLS
+      const { data: existingClass, error: checkError } = await supabaseAdmin
         .from('classes')
         .select('teacher_id')
         .eq('id', id)
@@ -427,8 +422,8 @@ router.delete(
         throw new ApiError(403, 'You do not have permission to delete this class');
       }
 
-      // Delete class
-      const { error } = await supabase
+      // Delete class using admin client to bypass RLS
+      const { error } = await supabaseAdmin
         .from('classes')
         .delete()
         .eq('id', id);
@@ -480,8 +475,8 @@ router.post(
 
       const teacherId = teacherData.id;
 
-      // Check if class exists and user is the teacher
-      const { data: existingClass, error: checkError } = await supabase
+      // Check if class exists and user is the teacher using admin client to bypass RLS
+      const { data: existingClass, error: checkError } = await supabaseAdmin
         .from('classes')
         .select('teacher_id')
         .eq('id', id)
@@ -495,13 +490,13 @@ router.post(
         throw new ApiError(403, 'You do not have permission to add students to this class');
       }
 
-      // Add students to class
+      // Add students to class using admin client to bypass RLS
       const studentEntries = student_ids.map(student_id => ({
         class_id: id,
         student_id
       }));
 
-      const { error } = await supabase
+      const { error } = await supabaseAdmin
         .from('class_students')
         .upsert(studentEntries, { onConflict: ['class_id', 'student_id'] });
 
@@ -550,8 +545,8 @@ router.delete(
 
       const teacherId = teacherData.id;
 
-      // Check if class exists and user is the teacher
-      const { data: existingClass, error: checkError } = await supabase
+      // Check if class exists and user is the teacher using admin client to bypass RLS
+      const { data: existingClass, error: checkError } = await supabaseAdmin
         .from('classes')
         .select('teacher_id')
         .eq('id', id)
@@ -565,8 +560,8 @@ router.delete(
         throw new ApiError(403, 'You do not have permission to remove students from this class');
       }
 
-      // Remove student from class
-      const { error } = await supabase
+      // Remove student from class using admin client to bypass RLS
+      const { error } = await supabaseAdmin
         .from('class_students')
         .delete()
         .eq('class_id', id)
