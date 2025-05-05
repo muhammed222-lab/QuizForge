@@ -1,0 +1,12 @@
+| table_name      |
+| --------------- |
+| ai_content      |
+| class_students  |
+| classes         |
+| exam_attempts   |
+| exams           |
+| materials       |
+| questions       |
+| student_answers |
+| students        |
+| teachers        |
